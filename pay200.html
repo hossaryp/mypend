@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pay with MetaMask</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        #payButton {
+            background-color: #FF8A34;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        #payButton:hover {
+            background-color: #FFDE30;
+        }
+    </style>
+</head>
+<body>
+    <button id="payButton">Pay with MetaMask</button>
+
+    <!-- Include Web3.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <script>
+        document.getElementById('payButton').addEventListener('click', async () => {
+            if (typeof window.ethereum !== 'undefined') {
+                try {
+                    // Request account access if needed
+                    await ethereum.request({ method: 'eth_requestAccounts' });
+
+                    // Create a new web3 instance
+                    const web3 = new Web3(window.ethereum);
+
+                    const usdtContractAddress = '0xdAC17F958D2ee523a2206206994597C13D831ec7'; // USDT contract address on Ethereum
+                    const usdtAbi = [
+                        {
+                            "constant": false,
+                            "inputs": [
+                                { "name": "_to", "type": "address" },
+                                { "name": "_value", "type": "uint256" }
+                            ],
+                            "name": "transfer",
+                            "outputs": [{ "name": "", "type": "bool" }],
+                            "type": "function"
+                        }
+                    ];
+
+                    const usdtContract = new web3.eth.Contract(usdtAbi, usdtContractAddress);
+
+                    // Fetch current gas price from the Ethereum network
+                    const gasPrice = await web3.eth.getGasPrice();
+
+                    // Estimate gas limit for the transaction
+                    const gasLimit = await usdtContract.methods.transfer('0xRecipientAddress', web3.utils.toWei('200', 'mwei')).estimateGas({ from: ethereum.selectedAddress });
+
+                    const transactionParameters = {
+                        to: usdtContractAddress,
+                        from: ethereum.selectedAddress,
+                        gas: web3.utils.toHex(gasLimit), // Set the gas limit
+                        gasPrice: web3.utils.toHex(gasPrice), // Use the fetched gas price
+                        data: usdtContract.methods.transfer('0xRecipientAddress', web3.utils.toWei('200', 'mwei')).encodeABI()
+                    };
+
+                    // Send the transaction
+                    const txHash = await ethereum.request({
+                        method: 'eth_sendTransaction',
+                        params: [transactionParameters]
+                    });
+
+                    console.log('Transaction Hash:', txHash);
+                    alert('Transaction sent! Hash: ' + txHash);
+                } catch (error) {
+                    console.error(error);
+                    alert('Transaction failed: ' + error.message);
+                }
+            } else {
+                alert('MetaMask is not installed!');
+            }
+        });
+    </script>
+</body>
+</html>
