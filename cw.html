@@ -10,6 +10,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            flex-direction: column;
             height: 100vh;
             margin: 0;
             background-color: #f0f0f0;
@@ -24,14 +25,20 @@
             cursor: pointer;
             border-radius: 5px;
             transition: background-color 0.3s;
+            margin-bottom: 20px;
         }
         #connectButton:hover {
             background-color: #00bfa5;
+        }
+        #publicKey {
+            font-size: 14px;
+            color: #333;
         }
     </style>
 </head>
 <body>
     <button id="connectButton">Connect with MetaMask</button>
+    <div id="publicKey"></div>
     <script>
         document.getElementById('connectButton').addEventListener('click', async () => {
             if (typeof window.ethereum !== 'undefined') {
@@ -41,23 +48,24 @@
                     const accounts = await ethereum.request({ method: 'eth_accounts' });
 
                     // Display the connected account
-                    alert(`Connected account: ${accounts[0]}`);
+                    const publicKeyDiv = document.getElementById('publicKey');
+                    publicKeyDiv.textContent = `Connected account: ${accounts[0]}`;
 
-                    // Sign a message
-                    const message = 'Hello from Wix!';
-                    const from = accounts[0];
-                    const params = [message, from];
-                    const method = 'personal_sign';
+                    // Optionally, sign a message
+                    // const message = 'Sign in To Pend!';
+                    // const from = accounts[0];
+                    // const params = [message, from];
+                    // const method = 'personal_sign';
 
-                    ethereum.request({ method, params, from })
-                        .then((result) => {
-                            console.log('Signature:', result);
-                            alert('Message signed successfully!');
-                        })
-                        .catch((error) => {
-                            console.error(error);
-                            alert('Error signing message.');
-                        });
+                    // ethereum.request({ method, params, from })
+                    //     .then((result) => {
+                    //         console.log('Signature:', result);
+                    //         alert('Message signed successfully!');
+                    //     })
+                    //     .catch((error) => {
+                    //         console.error(error);
+                    //         alert('Error signing message.');
+                    //     });
                 } catch (error) {
                     console.error(error);
                     alert('Failed to connect wallet.');
